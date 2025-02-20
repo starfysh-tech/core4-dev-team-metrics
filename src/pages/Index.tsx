@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import SurveyForm from "@/components/SurveyForm";
+import SurveyForm, { QUESTIONS } from "@/components/SurveyForm";
 import ScoreCard from "@/components/ScoreCard";
 import ResponseChart from "@/components/ResponseChart";
 import ResponseTable from "@/components/ResponseTable";
@@ -11,15 +10,41 @@ import { ChevronDown, ChevronUp, Share2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { generateRandomResponses } from "@/lib/utils";
 import { toast } from "sonner";
+import Cookies from 'js-cookie';
+import TeamResults from "@/components/TeamResults";
 
 export interface Response {
   id: string;
-  timestamp: string;
+  survey_id: string;
+  team_name: string;
+  response_number: number;
   ratings: Record<string, number>;
+  created_at: string;
 }
+
+const validateRatings = (ratings: Record<string, number>): boolean => {
+  // Check if all required questions are answered
+  const hasAllQuestions = Object.keys(QUESTIONS).every(key => key in ratings);
+  if (!hasAllQuestions) {
+    toast.error("Please answer all questions");
+    return false;
+  }
+
+  // Check if all ratings are valid (1-5 or 9)
+  const hasValidRatings = Object.values(ratings).every(
+    rating => rating === 9 || (rating >= 1 && rating <= 5)
+  );
+  if (!hasValidRatings) {
+    toast.error("Invalid rating values detected");
+    return false;
+  }
+
+  return true;
+};
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [surveyId, setSurveyId] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
   const [showForm, setShowForm] = useState(true);
@@ -27,95 +52,150 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initializeTeam = async () => {
-      const team = searchParams.get("team");
-      if (team) {
-        setTeamName(team);
-        const { data, error } = await supabase
-          .from("responses")
-          .select("*")
-          .eq("team", team);
-        
-        if (error) {
+    const initializeSurvey = async () => {
+      const id = searchParams.get("id");
+      if (id) {
+        setSurveyId(id);
+        try {
+          const { data, error } = await supabase
+            .from("responses")
+            .select("*")
+            .eq("survey_id", id)
+            .order("response_number", { ascending: true });
+          
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            setResponses(data);
+            setTeamName(data[0].team_name);
+            
+            // Check if user has submitted
+            const hasSubmitted = Cookies.get(`survey_${id}_submitted`);
+            setShowForm(!hasSubmitted);
+          }
+        } catch (error) {
           console.error("Error fetching responses:", error);
           toast.error("Failed to fetch responses");
-          return;
-        }
-        
-        if (data) {
-          setResponses(data);
-          // If there's data, show the results view by default
-          if (data.length > 0) {
-            setShowForm(false);
-          }
         }
       }
       setLoading(false);
     };
-
-    initializeTeam();
+  
+    initializeSurvey();
   }, [searchParams]);
 
-  const handleTeamSubmit = (name: string) => {
-    setTeamName(name);
-    const params = new URLSearchParams();
-    params.set("team", name);
-    setSearchParams(params, { replace: true });
+  const handleTeamSubmit = async (name: string) => {
+    try {
+      // Generate a new survey ID
+      const newSurveyId = crypto.randomUUID();
+      setSurveyId(newSurveyId);
+      setTeamName(name);
+      
+      // Update URL with the survey ID
+      const params = new URLSearchParams(window.location.search);
+      params.set("id", newSurveyId);
+      setSearchParams(params);
+    } catch (error) {
+      console.error("Error creating new survey:", error);
+      toast.error("Failed to create new survey");
+    }
   };
 
   const handleSubmit = async (ratings: Record<string, number>) => {
-    if (!teamName) return;
-
-    const newResponse = {
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      team: teamName,
-      ratings,
-    };
-
-    const { error } = await supabase
-      .from("responses")
-      .insert(newResponse);
-
-    if (error) {
+    if (!teamName || !surveyId) return;
+  
+    // Validate ratings
+    if (!validateRatings(ratings)) return;
+  
+    try {
+      // Get the next response number
+      const nextResponseNumber = responses.length + 1;
+  
+      const newResponse = {
+        survey_id: surveyId,
+        team_name: teamName,
+        response_number: nextResponseNumber,
+        ratings,
+      };
+  
+      const { error } = await supabase
+        .from("responses")
+        .insert(newResponse);
+  
+      if (error) throw error;
+  
+      // Fetch the inserted response to get the generated ID and timestamp
+      const { data: insertedResponse, error: fetchError } = await supabase
+        .from("responses")
+        .select("*")
+        .eq("survey_id", surveyId)
+        .eq("response_number", nextResponseNumber)
+        .single();
+  
+      if (fetchError) throw fetchError;
+  
+      if (insertedResponse) {
+        Cookies.set(`survey_${surveyId}_submitted`, 'true', { expires: 365 });
+        setResponses((prev) => [...prev, insertedResponse]);
+        setShowForm(false);
+        toast.success("Response submitted successfully");
+      }
+    } catch (error) {
       console.error("Error submitting response:", error);
       toast.error("Failed to submit response");
-      return;
     }
-
-    setResponses((prev) => [...prev, newResponse]);
-    setShowForm(false);
-    toast.success("Response submitted successfully");
   };
 
   const handleShare = () => {
+    if (!surveyId) return;
+    
     const url = new URL(window.location.href);
-    url.searchParams.set("team", teamName || "");
+    url.searchParams.set("id", surveyId);
     navigator.clipboard.writeText(url.toString())
       .then(() => toast.success("Share link copied to clipboard!"))
       .catch(() => toast.error("Failed to copy share link"));
   };
 
   const handleGenerateResponses = async () => {
-    if (!teamName) return;
-
-    const newResponses = generateRandomResponses(5).map(response => ({
-      ...response,
-      team: teamName
-    }));
-
-    const { error } = await supabase
-      .from("responses")
-      .insert(newResponses);
-
-    if (error) {
+    if (!teamName || !surveyId) return;
+  
+    try {
+      const startingNumber = responses.length + 1;
+      const newResponses = generateRandomResponses(10).map((response, index) => ({  // Changed to 10
+        survey_id: surveyId,
+        team_name: teamName,
+        response_number: startingNumber + index,
+        ratings: response.ratings,
+      }));
+  
+      const { error } = await supabase
+        .from("responses")
+        .insert(newResponses);
+  
+      if (error) throw error;
+  
+      // Fetch the newly inserted responses
+      const { data: insertedResponses, error: fetchError } = await supabase
+        .from("responses")
+        .select("*")
+        .eq("survey_id", surveyId)
+        .gte("response_number", startingNumber)
+        .lte("response_number", startingNumber + 9)  // Changed to +9
+        .order("response_number", { ascending: true });
+  
+      if (fetchError) throw fetchError;
+  
+      if (insertedResponses) {
+        // Add this line to set the cookie
+        Cookies.set(`survey_${surveyId}_submitted`, 'true', { expires: 365 });
+        setResponses((prev) => [...prev, ...insertedResponses]);
+        setShowForm(false);
+        toast.success("Generated 10 random responses");
+      }
+    } catch (error) {
       console.error("Error generating responses:", error);
       toast.error("Failed to generate responses");
-      return;
     }
-
-    setResponses((prev) => [...prev, ...newResponses]);
-    toast.success("Generated 5 random responses");
   };
 
   if (loading) {
@@ -138,64 +218,62 @@ const Index = () => {
           </p>
         </header>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          {showForm ? (
-            <div className="lg:col-span-2">
-              <SurveyForm onSubmit={handleSubmit} />
+        <div className="space-y-8">
+        {showForm ? (
+          <SurveyForm 
+            onSubmit={handleSubmit} 
+            onGenerate={handleGenerateResponses} 
+          />
+        ) : (
+          <>
+            <TeamResults 
+              responses={responses} 
+              teamName={teamName || ""} 
+              questions={QUESTIONS}
+            />
+            <div className="max-w-md mx-auto space-y-4">
+              <Button 
+                onClick={() => setShowForm(true)}
+                className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
+              >
+                Submit New Response
+              </Button>
+              <Button
+                onClick={() => setShowHistory(!showHistory)}
+                variant="outline"
+                className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
+              >
+                {showHistory ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" />
+                    Hide Response History
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    Show Response History
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
+              >
+                <Share2 className="w-4 h-4" />
+                Share Team Results
+              </Button>
             </div>
-          ) : (
-            <>
-              <div className="space-y-8">
-                <ScoreCard responses={responses} />
-                <ResponseChart responses={responses} />
-              </div>
-              <div className="space-y-4">
-                <Button 
-                  onClick={() => setShowForm(true)}
-                  className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
-                >
-                  Submit New Response
-                </Button>
-                <Button
-                  onClick={() => setShowHistory(!showHistory)}
-                  variant="outline"
-                  className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
-                >
-                  {showHistory ? (
-                    <>
-                      <ChevronUp className="w-4 h-4" />
-                      Hide Response History
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="w-4 h-4" />
-                      Show Response History
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={handleShare}
-                  variant="outline"
-                  className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share Team Results
-                </Button>
-                <Button
-                  onClick={handleGenerateResponses}
-                  variant="outline"
-                  className="w-full font-mono border-orange-400 text-orange-400 hover:bg-orange-400/10"
-                >
-                  Generate Test Responses
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
+          </>
+        )}
 
         {showHistory && !showForm && (
-          <ResponseTable responses={responses} />
+          <div className="mt-8 bg-gray-900/80 backdrop-blur-sm rounded-lg p-6">
+            <h3 className="text-lg font-mono text-green-400 mb-4">Response History</h3>
+            <ResponseTable responses={responses} />
+          </div>
         )}
+        </div>
       </div>
     </div>
   );

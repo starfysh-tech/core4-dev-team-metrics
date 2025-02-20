@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Card,
@@ -10,22 +9,53 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-export const QUESTIONS = {
-  documentation: "Documentation quality and accessibility",
-  focus: "Deep work and focus time",
-  buildTest: "Build and test processes",
-  confidence: "Confidence in making changes",
-  incidents: "Incident response effectiveness",
-  localDev: "Local development experience",
-  planning: "Planning processes",
-  dependencies: "Cross-team dependencies management",
-  releases: "Ease of release process",
-  maintainability: "Code maintainability",
-};
-
 interface SurveyFormProps {
   onSubmit: (ratings: Record<string, number>) => void;
+  onGenerate: () => void;
 }
+
+export const QUESTIONS = {
+  documentation: {
+    title: "Documentation quality and accessibility",
+    description: "How well documented and accessible is the codebase?"
+  },
+  focus: {
+    title: "Deep work and focus time",
+    description: "Can you maintain focus without frequent interruptions?"
+  },
+  buildTest: {
+    title: "Build and test processes",
+    description: "How efficient are the build and testing workflows?"
+  },
+  confidence: {
+    title: "Confidence in making changes",
+    description: "How confident are you in making codebase changes?"
+  },
+  incidents: {
+    title: "Incident response effectiveness",
+    description: "How well does the team handle and resolve incidents?"
+  },
+  localDev: {
+    title: "Local development experience",
+    description: "How smooth is the local development process?"
+  },
+  planning: {
+    title: "Planning processes",
+    description: "How effective is the team's planning process?"
+  },
+  dependencies: {
+    title: "Cross-team dependencies management",
+    description: "How well are dependencies between teams managed?"
+  },
+  releases: {
+    title: "Ease of release process",
+    description: "How smooth is the release deployment process?"
+  },
+  maintainability: {
+    title: "Code maintainability",
+    description: "How maintainable and clean is the codebase?"
+  }
+};
 
 const RATING_LABELS = {
   1: "Very dissatisfied",
@@ -36,7 +66,7 @@ const RATING_LABELS = {
   9: "N/A",
 };
 
-const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
+const SurveyForm = ({ onSubmit, onGenerate }: SurveyFormProps) => {
   const [ratings, setRatings] = useState<Record<string, number>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -66,12 +96,17 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="grid gap-8">
-            {Object.entries(QUESTIONS).map(([key, question]) => (
-              <div key={key} className="space-y-3 p-4 rounded-lg bg-gray-800/50">
-                <label className="text-sm font-mono text-green-400 block">
-                  {`> ${question}`}
-                </label>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          {Object.entries(QUESTIONS).map(([key, { title, description }]) => (
+          <div key={key} className="space-y-3 p-4 rounded-lg bg-gray-800/50">
+            <div className="space-y-1">
+              <label className="text-sm font-mono text-green-400">
+                {`> ${title}`}
+              </label>
+              <span className="text-xs font-mono text-green-400/60 pl-4">
+                {description}
+              </span>
+            </div>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                   {[1, 2, 3, 4, 5, 9].map((rating) => (
                     <Button
                       key={rating}
@@ -107,13 +142,20 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
           </div>
         </form>
       </CardContent>
-      <CardFooter className="border-t border-green-400/20">
+      <CardFooter className="border-t border-green-400/20 flex gap-4">
         <Button 
           type="submit" 
           onClick={handleSubmit}
-          className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500 transition-colors duration-200"
+          className="flex-1 font-mono bg-green-400 text-gray-900 hover:bg-green-500 transition-colors duration-200"
         >
           SUBMIT_RESPONSE &gt;
+        </Button>
+        <Button
+          onClick={onGenerate}
+          variant="outline"
+          className="flex-1 font-mono border-orange-400 text-orange-400 hover:bg-orange-400/10"
+        >
+          GENERATE_TEST_DATA &gt;
         </Button>
       </CardFooter>
     </Card>
