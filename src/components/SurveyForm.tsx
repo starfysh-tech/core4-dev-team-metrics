@@ -58,17 +58,17 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
   };
 
   return (
-    <Card className="terminal-card">
-      <CardHeader>
+    <Card className="terminal-card bg-gray-900 border-green-400">
+      <CardHeader className="border-b border-green-400/20">
         <CardTitle className="text-xl font-mono text-green-400">
           {"// TEAM_SURVEY_FORM"}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="grid gap-8">
             {Object.entries(QUESTIONS).map(([key, question]) => (
-              <div key={key} className="space-y-3">
+              <div key={key} className="space-y-3 p-4 rounded-lg bg-gray-800/50">
                 <label className="text-sm font-mono text-green-400 block">
                   {`> ${question}`}
                 </label>
@@ -79,11 +79,19 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
                       type="button"
                       variant={ratings[key] === rating ? "default" : "outline"}
                       onClick={() => handleRatingClick(key, rating)}
-                      className={`h-auto py-2 px-3 font-mono text-xs sm:text-sm ${
-                        ratings[key] === rating
-                          ? "bg-green-400 text-gray-900 hover:bg-green-500"
-                          : "border-green-400 text-green-400 hover:bg-green-400/10"
-                      }`}
+                      className={`
+                        h-auto py-2 px-3 font-mono text-xs sm:text-sm transition-all duration-200
+                        ${ratings[key] === rating
+                          ? rating === 9
+                            ? "bg-gray-500 text-white hover:bg-gray-600"
+                            : rating <= 2
+                            ? "bg-red-400 text-white hover:bg-red-500"
+                            : rating === 3
+                            ? "bg-yellow-400 text-black hover:bg-yellow-500"
+                            : "bg-green-400 text-black hover:bg-green-500"
+                          : "border-green-400/50 text-green-400/80 hover:bg-green-400/10"
+                        }
+                      `}
                     >
                       {rating === 9 ? "N/A" : rating}
                       <span className="hidden md:inline ml-1">
@@ -93,7 +101,12 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
                   ))}
                 </div>
                 {ratings[key] && (
-                  <p className="text-xs font-mono text-green-600">
+                  <p className={`text-xs font-mono ${
+                    ratings[key] <= 2 ? 'text-red-400' : 
+                    ratings[key] === 3 ? 'text-yellow-400' : 
+                    ratings[key] === 9 ? 'text-gray-400' : 
+                    'text-green-400'
+                  }`}>
                     Selected: {RATING_LABELS[ratings[key] as keyof typeof RATING_LABELS]}
                   </p>
                 )}
@@ -102,11 +115,11 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
           </div>
         </form>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="border-t border-green-400/20">
         <Button 
           type="submit" 
           onClick={handleSubmit}
-          className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
+          className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500 transition-colors duration-200"
         >
           SUBMIT_RESPONSE &gt;
         </Button>

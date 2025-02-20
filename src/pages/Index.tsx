@@ -77,7 +77,7 @@ const Index = () => {
       return;
     }
 
-    setResponses((prev) => [...prev, newResponse]);
+    await fetchResponses(teamName);
     setShowForm(false);
     toast.success("Response submitted successfully");
   };
@@ -100,7 +100,7 @@ const Index = () => {
       return;
     }
 
-    setResponses((prev) => [...prev, ...newResponses]);
+    await fetchResponses(teamName);
     toast.success("Generated 5 random responses");
   };
 
