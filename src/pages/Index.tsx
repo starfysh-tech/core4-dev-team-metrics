@@ -1,12 +1,13 @@
+
 import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import SurveyForm from "@/components/SurveyForm";
 import ScoreCard from "@/components/ScoreCard";
 import ResponseChart from "@/components/ResponseChart";
 import ResponseTable from "@/components/ResponseTable";
 import TeamPrompt from "@/components/TeamPrompt";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Share2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { generateRandomResponses } from "@/lib/utils";
 import { toast } from "sonner";
@@ -19,7 +20,6 @@ export interface Response {
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [teamName, setTeamName] = useState<string | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
   const [showForm, setShowForm] = useState(true);
@@ -27,34 +27,40 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const team = searchParams.get("team");
-    if (team) {
-      setTeamName(team);
-      fetchResponses(team);
-    }
-    setLoading(false);
-  }, [searchParams]);
+    const initializeTeam = async () => {
+      const team = searchParams.get("team");
+      if (team) {
+        setTeamName(team);
+        const { data, error } = await supabase
+          .from("responses")
+          .select("*")
+          .eq("team", team);
+        
+        if (error) {
+          console.error("Error fetching responses:", error);
+          toast.error("Failed to fetch responses");
+          return;
+        }
+        
+        if (data) {
+          setResponses(data);
+          // If there's data, show the results view by default
+          if (data.length > 0) {
+            setShowForm(false);
+          }
+        }
+      }
+      setLoading(false);
+    };
 
-  const fetchResponses = async (team: string) => {
-    const { data, error } = await supabase
-      .from("responses")
-      .select("*")
-      .eq("team", team);
-    
-    if (error) {
-      console.error("Error fetching responses:", error);
-      toast.error("Failed to fetch responses");
-      return;
-    }
-    
-    if (data) {
-      setResponses(data);
-    }
-  };
+    initializeTeam();
+  }, [searchParams]);
 
   const handleTeamSubmit = (name: string) => {
     setTeamName(name);
-    navigate(`?team=${encodeURIComponent(name)}`);
+    const params = new URLSearchParams();
+    params.set("team", name);
+    setSearchParams(params, { replace: true });
   };
 
   const handleSubmit = async (ratings: Record<string, number>) => {
@@ -77,9 +83,17 @@ const Index = () => {
       return;
     }
 
-    await fetchResponses(teamName);
+    setResponses((prev) => [...prev, newResponse]);
     setShowForm(false);
     toast.success("Response submitted successfully");
+  };
+
+  const handleShare = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("team", teamName || "");
+    navigator.clipboard.writeText(url.toString())
+      .then(() => toast.success("Share link copied to clipboard!"))
+      .catch(() => toast.error("Failed to copy share link"));
   };
 
   const handleGenerateResponses = async () => {
@@ -100,7 +114,7 @@ const Index = () => {
       return;
     }
 
-    await fetchResponses(teamName);
+    setResponses((prev) => [...prev, ...newResponses]);
     toast.success("Generated 5 random responses");
   };
 
@@ -158,6 +172,14 @@ const Index = () => {
                       Show Response History
                     </>
                   )}
+                </Button>
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share Team Results
                 </Button>
                 <Button
                   onClick={handleGenerateResponses}

@@ -47,7 +47,6 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
     }
     onSubmit(ratings);
     setRatings({});
-    toast.success("Response processed successfully");
   };
 
   const handleRatingClick = (question: string, rating: number) => {
@@ -84,32 +83,25 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
                         ${ratings[key] === rating
                           ? rating === 9
                             ? "bg-gray-500 text-white hover:bg-gray-600"
-                            : rating <= 2
-                            ? "bg-red-400 text-white hover:bg-red-500"
-                            : rating === 3
-                            ? "bg-yellow-400 text-black hover:bg-yellow-500"
-                            : "bg-green-400 text-black hover:bg-green-500"
+                            : `bg-gradient-to-r ${
+                              rating === 1
+                                ? "from-red-500 to-red-400"
+                                : rating === 2
+                                ? "from-orange-500 to-orange-400"
+                                : rating === 3
+                                ? "from-yellow-500 to-yellow-400"
+                                : rating === 4
+                                ? "from-blue-400 to-blue-300"
+                                : "from-blue-600 to-blue-500"
+                            } ${rating <= 2 ? "text-white" : "text-black"}`
                           : "border-green-400/50 text-green-400/80 hover:bg-green-400/10"
                         }
                       `}
                     >
                       {rating === 9 ? "N/A" : rating}
-                      <span className="hidden md:inline ml-1">
-                        {rating !== 9 && `-${RATING_LABELS[rating as keyof typeof RATING_LABELS]}`}
-                      </span>
                     </Button>
                   ))}
                 </div>
-                {ratings[key] && (
-                  <p className={`text-xs font-mono ${
-                    ratings[key] <= 2 ? 'text-red-400' : 
-                    ratings[key] === 3 ? 'text-yellow-400' : 
-                    ratings[key] === 9 ? 'text-gray-400' : 
-                    'text-green-400'
-                  }`}>
-                    Selected: {RATING_LABELS[ratings[key] as keyof typeof RATING_LABELS]}
-                  </p>
-                )}
               </div>
             ))}
           </div>
