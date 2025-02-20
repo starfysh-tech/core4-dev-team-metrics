@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Card,
@@ -6,13 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -33,6 +27,15 @@ interface SurveyFormProps {
   onSubmit: (ratings: Record<string, number>) => void;
 }
 
+const RATING_LABELS = {
+  1: "Very dissatisfied",
+  2: "Dissatisfied",
+  3: "Neutral",
+  4: "Satisfied",
+  5: "Very satisfied",
+  9: "N/A",
+};
+
 const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
   const [ratings, setRatings] = useState<Record<string, number>>({});
 
@@ -47,6 +50,13 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
     toast.success("Response processed successfully");
   };
 
+  const handleRatingClick = (question: string, rating: number) => {
+    setRatings((prev) => ({
+      ...prev,
+      [question]: rating,
+    }));
+  };
+
   return (
     <Card className="terminal-card">
       <CardHeader>
@@ -56,33 +66,37 @@ const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-8">
             {Object.entries(QUESTIONS).map(([key, question]) => (
-              <div key={key} className="space-y-2">
-                <label className="text-sm font-mono text-green-400">
+              <div key={key} className="space-y-3">
+                <label className="text-sm font-mono text-green-400 block">
                   {`> ${question}`}
                 </label>
-                <Select
-                  value={ratings[key]?.toString()}
-                  onValueChange={(value) =>
-                    setRatings((prev) => ({
-                      ...prev,
-                      [key]: parseInt(value),
-                    }))
-                  }
-                >
-                  <SelectTrigger className="font-mono bg-gray-900 border-green-400 text-green-400">
-                    <SelectValue placeholder="SELECT RATING" />
-                  </SelectTrigger>
-                  <SelectContent className="font-mono bg-gray-900 border-green-400">
-                    <SelectItem value="1">1 - Very dissatisfied</SelectItem>
-                    <SelectItem value="2">2 - Dissatisfied</SelectItem>
-                    <SelectItem value="3">3 - Neutral</SelectItem>
-                    <SelectItem value="4">4 - Satisfied</SelectItem>
-                    <SelectItem value="5">5 - Very satisfied</SelectItem>
-                    <SelectItem value="9">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                  {[1, 2, 3, 4, 5, 9].map((rating) => (
+                    <Button
+                      key={rating}
+                      type="button"
+                      variant={ratings[key] === rating ? "default" : "outline"}
+                      onClick={() => handleRatingClick(key, rating)}
+                      className={`h-auto py-2 px-3 font-mono text-xs sm:text-sm ${
+                        ratings[key] === rating
+                          ? "bg-green-400 text-gray-900 hover:bg-green-500"
+                          : "border-green-400 text-green-400 hover:bg-green-400/10"
+                      }`}
+                    >
+                      {rating === 9 ? "N/A" : rating}
+                      <span className="hidden md:inline ml-1">
+                        {rating !== 9 && `-${RATING_LABELS[rating as keyof typeof RATING_LABELS]}`}
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+                {ratings[key] && (
+                  <p className="text-xs font-mono text-green-600">
+                    Selected: {RATING_LABELS[ratings[key] as keyof typeof RATING_LABELS]}
+                  </p>
+                )}
               </div>
             ))}
           </div>

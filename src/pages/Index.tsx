@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import SurveyForm from "@/components/SurveyForm";
@@ -8,6 +9,8 @@ import TeamPrompt from "@/components/TeamPrompt";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { generateRandomResponses } from "@/lib/utils";
+import { toast } from "sonner";
 
 export interface Response {
   id: string;
@@ -33,10 +36,16 @@ const Index = () => {
   }, [searchParams]);
 
   const fetchResponses = async (team: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("responses")
       .select("*")
       .eq("team", team);
+    
+    if (error) {
+      console.error("Error fetching responses:", error);
+      toast.error("Failed to fetch responses");
+      return;
+    }
     
     if (data) {
       setResponses(data);
@@ -62,10 +71,37 @@ const Index = () => {
       .from("responses")
       .insert(newResponse);
 
-    if (!error) {
-      setResponses((prev) => [...prev, newResponse]);
-      setShowForm(false);
+    if (error) {
+      console.error("Error submitting response:", error);
+      toast.error("Failed to submit response");
+      return;
     }
+
+    setResponses((prev) => [...prev, newResponse]);
+    setShowForm(false);
+    toast.success("Response submitted successfully");
+  };
+
+  const handleGenerateResponses = async () => {
+    if (!teamName) return;
+
+    const newResponses = generateRandomResponses(5).map(response => ({
+      ...response,
+      team: teamName
+    }));
+
+    const { error } = await supabase
+      .from("responses")
+      .insert(newResponses);
+
+    if (error) {
+      console.error("Error generating responses:", error);
+      toast.error("Failed to generate responses");
+      return;
+    }
+
+    setResponses((prev) => [...prev, ...newResponses]);
+    toast.success("Generated 5 random responses");
   };
 
   if (loading) {
@@ -102,14 +138,14 @@ const Index = () => {
               <div className="space-y-4">
                 <Button 
                   onClick={() => setShowForm(true)}
-                  className="w-full font-mono"
+                  className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
                 >
                   Submit New Response
                 </Button>
                 <Button
                   onClick={() => setShowHistory(!showHistory)}
                   variant="outline"
-                  className="w-full font-mono flex items-center gap-2"
+                  className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
                 >
                   {showHistory ? (
                     <>
@@ -122,6 +158,13 @@ const Index = () => {
                       Show Response History
                     </>
                   )}
+                </Button>
+                <Button
+                  onClick={handleGenerateResponses}
+                  variant="outline"
+                  className="w-full font-mono border-orange-400 text-orange-400 hover:bg-orange-400/10"
+                >
+                  Generate Test Responses
                 </Button>
               </div>
             </>
