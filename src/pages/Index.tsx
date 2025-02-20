@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { createClient } from "@supabase/supabase-js";
 import SurveyForm from "@/components/SurveyForm";
 import ScoreCard from "@/components/ScoreCard";
 import ResponseChart from "@/components/ResponseChart";
@@ -9,8 +7,7 @@ import ResponseTable from "@/components/ResponseTable";
 import TeamPrompt from "@/components/TeamPrompt";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+import { supabase } from "@/lib/supabase";
 
 export interface Response {
   id: string;
