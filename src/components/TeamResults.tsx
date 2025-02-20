@@ -4,29 +4,31 @@ import ScoreCard from "@/components/ScoreCard";
 import ResponseChart from "@/components/ResponseChart";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
-import { QUESTIONS } from "./SurveyForm";
 
 interface TeamResultsProps {
   responses: Response[];
   teamName: string;
-  questions: typeof QUESTIONS;
 }
 
-const TeamResults = ({ responses, teamName, questions }: TeamResultsProps) => {
-    const handleExport = async () => {
-      const element = document.getElementById('team-results');
-      if (!element) return;
-      
-      try {
-        const canvas = await html2canvas(element);
-        const link = document.createElement('a');
-        link.download = `${teamName}-team-effectiveness.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-      } catch (error) {
-        toast.error('Failed to export image');
-      }
-    };
+const TeamResults = ({ responses, teamName }: TeamResultsProps) => {
+  const handleExport = async () => {
+    const element = document.getElementById('team-results');
+    if (!element) return;
+    
+    try {
+      const canvas = await html2canvas(element, {
+        backgroundColor: 'rgb(17, 24, 39)', // dark background
+        useCORS: true,
+        scale: 2 // for better quality
+      });
+      const link = document.createElement('a');
+      link.download = `${teamName}-team-effectiveness.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    } catch (error) {
+      toast.error('Failed to export image');
+    }
+  };
   
     return (
       <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-6">
@@ -37,14 +39,6 @@ const TeamResults = ({ responses, teamName, questions }: TeamResultsProps) => {
           <ScoreCard responses={responses} />
           <div className="w-full">
             <ResponseChart responses={responses} />
-          </div>
-          <div className="space-y-4">
-            {Object.entries(questions).map(([key, { title, description }]) => (
-              <div key={key} className="border-t border-green-400/20 pt-4">
-                <h3 className="text-sm font-mono text-green-400">{title}</h3>
-                <p className="text-xs font-mono text-green-400/60">{description}</p>
-              </div>
-            ))}
           </div>
         </div>
         <div className="mt-6 pt-6 border-t border-green-400/20">

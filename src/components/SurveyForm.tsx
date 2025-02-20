@@ -58,11 +58,11 @@ export const QUESTIONS = {
 };
 
 const RATING_LABELS = {
-  1: "Very dissatisfied",
+  1: "Unhappy",
   2: "Dissatisfied",
   3: "Neutral",
   4: "Satisfied",
-  5: "Very satisfied",
+  5: "Happy",
   9: "N/A",
 };
 

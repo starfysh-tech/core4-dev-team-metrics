@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import SurveyForm, { QUESTIONS } from "@/components/SurveyForm";
 import ScoreCard from "@/components/ScoreCard";
@@ -50,6 +50,20 @@ const Index = () => {
   const [showForm, setShowForm] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const topRef = useRef<HTMLDivElement>(null);
+  const historyRef = useRef<HTMLDivElement>(null);
+  
+  const handleHistoryToggle = () => {
+    setShowHistory(!showHistory);
+    setTimeout(() => {
+      if (!showHistory) {
+        historyRef.current?.scrollIntoView({ behavior: "smooth" });
+      } else {
+        topRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
+  };
 
   useEffect(() => {
     const initializeSurvey = async () => {
@@ -198,6 +212,31 @@ const Index = () => {
     }
   };
 
+  const handleDownloadCSV = () => {
+    if (!responses.length) return;
+  
+    const headers = ['Response #', ...Object.values(QUESTIONS).map(q => q.title), 'Date'];
+    const csvContent = [
+      headers.join(','),
+      ...responses.map(response => {
+        const row = [
+          response.response_number,
+          ...Object.keys(QUESTIONS).map(key => 
+            response.ratings[key] === 9 ? 'N/A' : response.ratings[key]
+          ),
+          new Date(response.created_at).toLocaleDateString()
+        ];
+        return row.join(',');
+      })
+    ].join('\n');
+  
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${teamName}-responses.csv`;
+    link.click();
+  };
+
   if (loading) {
     return null;
   }
@@ -206,10 +245,17 @@ const Index = () => {
     return <TeamPrompt onSubmit={handleTeamSubmit} />;
   }
 
+  const handleStartNewReport = () => {
+    if (surveyId) {
+      Cookies.remove(`survey_${surveyId}_submitted`);
+    }
+    window.location.href = '/';
+  };
+
   return (
     <div className="min-h-screen px-4 py-8">
       <div className="mx-auto max-w-7xl space-y-8">
-        <header className="text-center">
+        <header className="text-center" ref={topRef}>
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-green-400 font-mono mb-2">
             {`> TEAM "${teamName}" EFFECTIVENESS_`}
           </h1>
@@ -229,17 +275,24 @@ const Index = () => {
             <TeamResults 
               responses={responses} 
               teamName={teamName || ""} 
-              questions={QUESTIONS}
             />
-            <div className="max-w-md mx-auto space-y-4">
+            <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
               <Button 
-                onClick={() => setShowForm(true)}
+                onClick={handleStartNewReport}
                 className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
               >
-                Submit New Response
+                Start a New Report
               </Button>
               <Button
-                onClick={() => setShowHistory(!showHistory)}
+                onClick={handleShare}
+                variant="outline"
+                className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
+              >
+                <Share2 className="w-4 h-4" />
+                Share with Team Members
+              </Button>
+              <Button
+                onClick={handleHistoryToggle}
                 variant="outline"
                 className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
               >
@@ -256,20 +309,21 @@ const Index = () => {
                 )}
               </Button>
               <Button
-                onClick={handleShare}
+                onClick={handleDownloadCSV}
                 variant="outline"
-                className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
+                className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
               >
-                <Share2 className="w-4 h-4" />
-                Share Team Results
+                DOWNLOAD_CSV &gt;
               </Button>
             </div>
           </>
         )}
 
         {showHistory && !showForm && (
-          <div className="mt-8 bg-gray-900/80 backdrop-blur-sm rounded-lg p-6">
-            <h3 className="text-lg font-mono text-green-400 mb-4">Response History</h3>
+          <div ref={historyRef} className="mt-8 bg-gray-900/80 backdrop-blur-sm rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-mono text-green-400">Response History</h3>
+            </div>
             <ResponseTable responses={responses} />
           </div>
         )}

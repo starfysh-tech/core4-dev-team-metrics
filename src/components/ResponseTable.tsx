@@ -22,35 +22,37 @@ interface ResponseTableProps {
 
 const ResponseTable = ({ responses }: ResponseTableProps) => {
   return (
-    <Card className="glass">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">Response History</CardTitle>
-      </CardHeader>
+    <Card>
       <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">#</TableHead>
-                {Object.values(QUESTIONS).map((question) => (
-                  <TableHead key={question}>{question}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {responses.map((response, index) => (
-                <TableRow key={response.id}>
-                  <TableCell>{index + 1}</TableCell>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Response #</TableHead>
+              {Object.entries(QUESTIONS).map(([key, { title }]) => (
+                <TableHead key={key}>{title}</TableHead>
+              ))}
+              <TableHead>Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {responses.map((response, index) => (
+                <TableRow 
+                  key={response.id}
+                  className={index % 2 === 0 ? "bg-gray-900/50" : "bg-gray-800/50"}
+                >
+                  <TableCell className="font-mono">{response.response_number}</TableCell>
                   {Object.keys(QUESTIONS).map((key) => (
-                    <TableCell key={key}>
-                      {response.ratings[key] === 9 ? "N/A" : response.ratings[key]}
+                    <TableCell key={key} className="font-mono text-center">
+                      {response.ratings[key] === 9 ? 'N/A' : response.ratings[key]}
                     </TableCell>
                   ))}
+                  <TableCell className="font-mono">
+                    {new Date(response.created_at).toLocaleDateString()}
+                  </TableCell>
                 </TableRow>
               ))}
-            </TableBody>
-          </Table>
-        </div>
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );

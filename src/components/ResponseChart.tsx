@@ -21,14 +21,14 @@ const COLORS = {
 };
 
 const ResponseChart = ({ responses }: { responses: Response[] }) => {
-  const data = Object.entries(QUESTIONS).map(([key, question]) => {
+  const data = Object.entries(QUESTIONS).map(([key, { title }]) => {
     const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 9: 0 };
     responses.forEach((response) => {
       const rating = response.ratings[key];
       counts[rating as keyof typeof counts]++;
     });
     return {
-      category: question,
+      category: title,
       ...counts,
     };
   });
@@ -41,19 +41,30 @@ const ResponseChart = ({ responses }: { responses: Response[] }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[400px] md:h-[500px]">
+        <div className="h-[600px] md:h-[700px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
               layout="vertical"
-              margin={{ top: 20, right: 30, left: 150, bottom: 5 }}
+              margin={{ top: 20, right: 40, left: 60, bottom: 40 }}
+              barSize={40}
             >
-              <XAxis type="number" stroke="#4ade80" />
+              <XAxis 
+                type="number" 
+                stroke="#4ade80"
+                tickMargin={8}
+              />
               <YAxis
                 type="category"
                 dataKey="category"
-                width={140}
-                tick={{ fontSize: 11, fill: "#4ade80" }}
+                width={220}
+                tick={{ 
+                  fontSize: 18, 
+                  fill: "#4ade80", 
+                  fontFamily: "IBM Plex Mono", 
+                  letterSpacing: "0.1em" 
+                }}
+                tickMargin={4}
               />
               <Tooltip
                 contentStyle={{
@@ -68,7 +79,14 @@ const ResponseChart = ({ responses }: { responses: Response[] }) => {
                 wrapperStyle={{
                   fontFamily: "IBM Plex Mono",
                   color: "#4ade80",
+                  paddingTop: "20px",
+                  marginLeft: "16px",
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "center"
                 }}
+                iconSize={30}
+                formatter={(value) => <span style={{ paddingLeft: "12px", paddingRight: "32px" }}>{value}</span>}
               />
               {[1, 2, 3, 4, 5].map((rating) => (
                 <Bar
@@ -78,14 +96,14 @@ const ResponseChart = ({ responses }: { responses: Response[] }) => {
                   fill={COLORS[rating as keyof typeof COLORS]}
                   name={`${rating} - ${
                     rating === 1
-                      ? "Very dissatisfied"
+                      ? "Unhappy"
                       : rating === 2
                       ? "Dissatisfied"
                       : rating === 3
                       ? "Neutral"
                       : rating === 4
                       ? "Satisfied"
-                      : "Very satisfied"
+                      : "Happy"
                   }`}
                 />
               ))}
