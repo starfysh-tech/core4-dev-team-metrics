@@ -39,6 +39,8 @@
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
+    "@sentry/node": "^9.1.0",
+    "@sentry/react": "^9.1.0",
     "@supabase/supabase-js": "^2.48.1",
     "@tanstack/react-query": "^5.56.2",
     "@types/js-cookie": "^3.0.6",
@@ -67,6 +69,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@flydotio/dockerfile": "^0.7.8",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
