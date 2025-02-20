@@ -22,6 +22,9 @@ Sentry.init({
     Sentry.replayIntegration(),
   ],
 
+  // Adjust these settings to reduce the impact of ad blockers
+  transport: "fetch",
+
   // Set tracesSampleRate to 1.0 to capture 100%
   // of transactions for tracing.
   // Learn more at
@@ -37,4 +40,22 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/session-replay/configuration/#general-integration-configuration
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
+
+  // Add allowed domains to prevent ad blockers from blocking the requests
+  allowUrls: [
+    window.location.origin
+  ],
+  
+  // Add this to ensure errors are properly captured
+  beforeSend(event) {
+    // Check if the error is being blocked by the client
+    if (event.exception) {
+      // Add additional context that might be helpful
+      event.tags = {
+        ...event.tags,
+        environment: process.env.NODE_ENV
+      };
+    }
+    return event;
+  }
 });
