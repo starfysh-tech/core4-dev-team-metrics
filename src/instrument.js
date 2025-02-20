@@ -22,9 +22,6 @@ Sentry.init({
     Sentry.replayIntegration(),
   ],
 
-  // Adjust these settings to reduce the impact of ad blockers
-  transport: "fetch",
-
   // Set tracesSampleRate to 1.0 to capture 100%
   // of transactions for tracing.
   // Learn more at
