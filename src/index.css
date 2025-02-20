@@ -1,5 +1,4 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,30 +6,67 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+    --background: 222 47% 11%;
+    --foreground: 142 71% 45%;
+    --card: 225 47% 8%;
+    --card-foreground: 142 71% 45%;
+    --popover: 225 47% 8%;
+    --popover-foreground: 142 71% 45%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 225 47% 8%;
+    --secondary: 225 47% 15%;
+    --secondary-foreground: 142 71% 45%;
+    --muted: 225 47% 15%;
+    --muted-foreground: 142 71% 35%;
+    --accent: 225 47% 15%;
+    --accent-foreground: 142 71% 45%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --border: 142 71% 45%;
+    --input: 225 47% 15%;
+    --ring: 142 71% 45%;
+    --radius: 0;
   }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
+    background-color: hsl(222 47% 11%);
+    background-image: 
+      linear-gradient(
+        rgba(16, 22, 36, 0.8) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(16, 22, 36, 0.8) 1px,
+        transparent 1px
+      );
+    background-size: 20px 20px;
+  }
+}
+
+.terminal-card {
+  @apply border-2 border-green-400 bg-gray-900 shadow-[0_0_15px_rgba(74,222,128,0.2)] overflow-hidden;
+}
+
+.glass {
+  @apply border-2 border-green-400 bg-gray-900/90 backdrop-blur-sm;
+}
+
+.glass:hover {
+  @apply bg-gray-900/95;
+}
+
+.animate-score {
+  animation: terminal-in 0.8s steps(10, end);
+}
+
+@keyframes terminal-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
   }
 }
 

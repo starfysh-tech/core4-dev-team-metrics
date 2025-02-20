@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Card,
@@ -32,66 +31,70 @@ export const QUESTIONS = {
 
 interface SurveyFormProps {
   onSubmit: (ratings: Record<string, number>) => void;
-  onGenerate: () => void;
 }
 
-const SurveyForm = ({ onSubmit, onGenerate }: SurveyFormProps) => {
+const SurveyForm = ({ onSubmit }: SurveyFormProps) => {
   const [ratings, setRatings] = useState<Record<string, number>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (Object.keys(ratings).length < Object.keys(QUESTIONS).length) {
-      toast.error("Please rate all categories");
+      toast.error("ERROR: All fields required");
       return;
     }
     onSubmit(ratings);
     setRatings({});
-    toast.success("Response submitted successfully");
+    toast.success("Response processed successfully");
   };
 
   return (
-    <Card className="glass">
+    <Card className="terminal-card">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">Team Survey</CardTitle>
+        <CardTitle className="text-xl font-mono text-green-400">
+          {"// TEAM_SURVEY_FORM"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {Object.entries(QUESTIONS).map(([key, question]) => (
-            <div key={key} className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                {question}
-              </label>
-              <Select
-                value={ratings[key]?.toString()}
-                onValueChange={(value) =>
-                  setRatings((prev) => ({
-                    ...prev,
-                    [key]: parseInt(value),
-                  }))
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select rating" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 - Very dissatisfied</SelectItem>
-                  <SelectItem value="2">2 - Dissatisfied</SelectItem>
-                  <SelectItem value="3">3 - Neutral</SelectItem>
-                  <SelectItem value="4">4 - Satisfied</SelectItem>
-                  <SelectItem value="5">5 - Very satisfied</SelectItem>
-                  <SelectItem value="9">N/A</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 sm:grid-cols-2">
+            {Object.entries(QUESTIONS).map(([key, question]) => (
+              <div key={key} className="space-y-2">
+                <label className="text-sm font-mono text-green-400">
+                  {`> ${question}`}
+                </label>
+                <Select
+                  value={ratings[key]?.toString()}
+                  onValueChange={(value) =>
+                    setRatings((prev) => ({
+                      ...prev,
+                      [key]: parseInt(value),
+                    }))
+                  }
+                >
+                  <SelectTrigger className="font-mono bg-gray-900 border-green-400 text-green-400">
+                    <SelectValue placeholder="SELECT RATING" />
+                  </SelectTrigger>
+                  <SelectContent className="font-mono bg-gray-900 border-green-400">
+                    <SelectItem value="1">1 - Very dissatisfied</SelectItem>
+                    <SelectItem value="2">2 - Dissatisfied</SelectItem>
+                    <SelectItem value="3">3 - Neutral</SelectItem>
+                    <SelectItem value="4">4 - Satisfied</SelectItem>
+                    <SelectItem value="5">5 - Very satisfied</SelectItem>
+                    <SelectItem value="9">N/A</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+          </div>
         </form>
       </CardContent>
-      <CardFooter className="flex gap-4">
-        <Button type="submit" onClick={handleSubmit}>
-          Submit Response
-        </Button>
-        <Button variant="outline" onClick={onGenerate}>
-          Generate 10 Random Responses
+      <CardFooter>
+        <Button 
+          type="submit" 
+          onClick={handleSubmit}
+          className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
+        >
+          SUBMIT_RESPONSE &gt;
         </Button>
       </CardFooter>
     </Card>
