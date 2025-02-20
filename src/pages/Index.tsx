@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import SurveyForm from "@/components/SurveyForm";
 import ScoreCard from "@/components/ScoreCard";
 import ResponseChart from "@/components/ResponseChart";
@@ -20,6 +19,7 @@ export interface Response {
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [teamName, setTeamName] = useState<string | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
   const [showForm, setShowForm] = useState(true);
@@ -54,7 +54,7 @@ const Index = () => {
 
   const handleTeamSubmit = (name: string) => {
     setTeamName(name);
-    setSearchParams({ team: name });
+    navigate(`?team=${encodeURIComponent(name)}`);
   };
 
   const handleSubmit = async (ratings: Record<string, number>) => {
