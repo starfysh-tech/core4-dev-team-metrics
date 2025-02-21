@@ -7,6 +7,11 @@ import {
   useNavigationType,
 } from "react-router-dom";
 
+// Make Sentry available globally for testing
+if (process.env.NODE_ENV !== 'production') {
+  window.Sentry = Sentry;
+}
+
 Sentry.init({
   dsn: "https://c02a5aedefc8f80c54ca75cf27aca6c2@o4508028501688320.ingest.us.sentry.io/4508028501884928",
   integrations: [
