@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,9 @@ const TeamPrompt = ({ onSubmit }: TeamPromptProps) => {
             PROCEED &gt;
           </Button>
         </form>
+        <div className="mt-6 font-mono text-green-600/80 text-sm">
+          {"// Inspired on the Core 4, the best way to measure and improve your product velocity"}
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,69 +1,72 @@
-# Welcome to your Lovable project
+# Core4
 
-## Project info
+A modern web application for measuring and improving engineering team effectiveness using the Core4 framework. This tool helps engineering teams assess their performance across 10 key dimensions that are proven to impact team productivity and happiness.
 
-**URL**: <https://lovable.dev/projects/bb0e07be-de4c-4edc-8302-769f597f1c7d>
+[![Deployed on fly.io](https://img.shields.io/badge/deployed%20on-fly.io-blue)](https://core4.starfysh.net)
 
-## How can I edit this code?
+## 📚 References
 
-There are several ways of editing your application.
+This application is based on:
+- [Introducing Core4: The Best Way to Measure Engineering Team Effectiveness](https://www.lennysnewsletter.com/p/introducing-core-4-the-best-way-to) by Lenny Rachitsky
+- [Core4 Survey Template](https://docs.google.com/spreadsheets/d/1brKPLRJ9DDQAAFr1GM4hcFZg9zGUAGplQw2OkVx52Ls/edit?gid=0#gid=0)
 
-### Use Lovable
+## 🚀 Live Demo
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/bb0e07be-de4c-4edc-8302-769f597f1c7d) and start prompting.
+Visit [https://core4.starfysh.net](https://core4.starfysh.net)
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🔧 Technologies
 
-### Use your preferred IDE
+This project leverages modern web technologies for optimal performance and developer experience:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend Framework**: React with TypeScript
+- **Build Tool**: Vite
+- **UI Components**: shadcn-ui
+- **Styling**: Tailwind CSS
+- **Database**: Supabase
+- **Deployment**: fly.io
+- **Error Monitoring**: Sentry
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚦 Prerequisites
 
-Follow these steps:
+Before you begin, ensure you have the following installed:
+- Node.js (LTS version recommended)
+- npm (comes with Node.js)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+We recommend using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) to manage Node.js versions.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠️ Local Development
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd core4
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Start the development server
+```bash
 npm run dev
 ```
 
-## Edit a file directly in GitHub
+4. Open your browser and navigate to `http://localhost:5173` to see the application in action.
+```bash
+npm run dev
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The application will be available at `http://localhost:5173`
 
-## Use GitHub Codespaces
+## 📦 Deployment
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+This project is deployed on fly.io. For deployment instructions, please refer to the internal deployment documentation.
 
-## What technologies are used for this project?
+## 🐛 Bug Reports
 
-This project is built with .
+If you encounter any issues, please report them in the project's issue tracker.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📝 License
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/bb0e07be-de4c-4edc-8302-769f597f1c7d) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+[Add appropriate license]
