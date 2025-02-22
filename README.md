@@ -74,7 +74,7 @@ We recommend using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) 
 3. Set up environment variables
 
     ```bash
-    cp .env.example .env
+    touch .env
     ```
 
     Edit `.env` with your Supabase and Sentry credentials:
