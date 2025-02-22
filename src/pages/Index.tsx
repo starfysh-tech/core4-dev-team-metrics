@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import SurveyForm, { QUESTIONS } from "@/components/SurveyForm";
-import ScoreCard from "@/components/ScoreCard";
-import ResponseChart from "@/components/ResponseChart";
+import SurveyForm from "@/components/SurveyForm";
 import ResponseTable from "@/components/ResponseTable";
 import TeamPrompt from "@/components/TeamPrompt";
 import { Button } from "@/components/ui/button";
@@ -12,6 +10,7 @@ import { generateRandomResponses } from "@/lib/utils";
 import { toast } from "sonner";
 import Cookies from 'js-cookie';
 import TeamResults from "@/components/TeamResults";
+import { QUESTIONS } from "@/lib/questions";
 
 export interface Response {
   id: string;
@@ -257,7 +256,7 @@ const Index = () => {
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="text-center" ref={topRef}>
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-green-400 font-mono mb-2">
-            {`> TEAM "${teamName}" EFFECTIVENESS_`}
+            {`> TEAM "${teamName}" CORE 4 FRAMEWORK_`}
           </h1>
           <p className="text-green-600 font-mono">
             {"// System ready for input"}

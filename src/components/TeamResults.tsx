@@ -36,7 +36,7 @@ const TeamResults = ({ responses, teamName }: TeamResultsProps) => {
       <div id="team-results" className="space-y-8">
         <div className="space-y-2">
           <h2 className="text-xl font-mono text-green-400">
-            {`> TEAM "${teamName}" EFFECTIVENESS_REPORT`}
+            {`> TEAM "${teamName}"`}
           </h2>
         </div>
         <ScoreCard responses={responses} />

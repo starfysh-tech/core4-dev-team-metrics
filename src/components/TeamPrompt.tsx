@@ -48,6 +48,14 @@ const TeamPrompt = ({ onSubmit }: TeamPromptProps) => {
         </form>
         <div className="mt-6 font-mono text-green-600/80 text-sm">
           {"// Inspired on the Core 4, the best way to measure and improve your product velocity"}
+          <a
+          href="https://www.lennysnewsletter.com/p/introducing-core-4-the-best-way-to"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300"
+        >
+          <span>Core 4</span>
+        </a>
         </div>
       </CardContent>
     </Card>

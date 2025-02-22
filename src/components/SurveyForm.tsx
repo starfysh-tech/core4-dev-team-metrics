@@ -8,54 +8,13 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { QUESTIONS, type CustomQuestion } from "@/lib/questions";
+import { type Question } from "@/lib/questions";
 
 interface SurveyFormProps {
   onSubmit: (ratings: Record<string, number>) => void;
   onGenerate: () => void;
 }
-
-export const QUESTIONS = {
-  documentation: {
-    title: "Documentation quality and accessibility",
-    description: "How well documented and accessible is the codebase?"
-  },
-  focus: {
-    title: "Deep work and focus time",
-    description: "Can you maintain focus without frequent interruptions?"
-  },
-  buildTest: {
-    title: "Build and test processes",
-    description: "How efficient are the build and testing workflows?"
-  },
-  confidence: {
-    title: "Confidence in making changes",
-    description: "How confident are you in making codebase changes?"
-  },
-  incidents: {
-    title: "Incident response effectiveness",
-    description: "How well does the team handle and resolve incidents?"
-  },
-  localDev: {
-    title: "Local development experience",
-    description: "How smooth is the local development process?"
-  },
-  planning: {
-    title: "Planning processes",
-    description: "How effective is the team's planning process?"
-  },
-  dependencies: {
-    title: "Cross-team dependencies management",
-    description: "How well are dependencies between teams managed?"
-  },
-  releases: {
-    title: "Ease of release process",
-    description: "How smooth is the release deployment process?"
-  },
-  maintainability: {
-    title: "Code maintainability",
-    description: "How maintainable and clean is the codebase?"
-  }
-};
 
 const RATING_LABELS = {
   1: "Unhappy",
@@ -79,11 +38,83 @@ const SurveyForm = ({ onSubmit, onGenerate }: SurveyFormProps) => {
     setRatings({});
   };
 
-  const handleRatingClick = (question: string, rating: number) => {
+  const handleRatingClick = (question: string, rating: number | { value: number; label: string }) => {
     setRatings((prev) => ({
       ...prev,
-      [question]: rating,
+      [question]: typeof rating === 'number' ? rating : rating.value,
     }));
+  };
+
+  const renderQuestionOptions = (key: string, question: Question) => {
+    if (question.type === 'effectiveness') {
+      return (
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          {[1, 2, 3, 4, 5, 9].map((rating) => (
+            <Button
+              key={rating}
+              type="button"
+              variant={ratings[key] === rating ? "default" : "outline"}
+              onClick={() => handleRatingClick(key, rating)}
+              className={`
+                h-auto py-2 px-3 font-mono text-xs sm:text-sm transition-all duration-200
+                ${ratings[key] === rating
+                  ? rating === 9
+                    ? "bg-gray-500 text-white hover:bg-gray-600"
+                    : `bg-gradient-to-r ${
+                      rating === 1
+                        ? "from-red-500 to-red-400"
+                        : rating === 2
+                        ? "from-orange-500 to-orange-400"
+                        : rating === 3
+                        ? "from-yellow-500 to-yellow-400"
+                        : rating === 4
+                        ? "from-blue-400 to-blue-300"
+                        : "from-blue-600 to-blue-500"
+                    } ${rating <= 2 ? "text-white" : "text-black"}`
+                  : "border-green-400/50 text-green-400/80 hover:bg-green-400/10"
+                }
+              `}
+            >
+              {rating === 9 ? "N/A" : rating}
+            </Button>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {(question as CustomQuestion).options.map((option) => (
+          <Button
+            key={option.value}
+            type="button"
+            variant={ratings[key] === option.value ? "default" : "outline"}
+            onClick={() => handleRatingClick(key, option)}
+            className={`
+              h-auto py-2 px-3 font-mono text-xs sm:text-sm transition-all duration-200
+              ${ratings[key] === option.value
+                ? option.value === -1
+                  ? "bg-gray-500 text-white hover:bg-gray-600"
+                  : `bg-gradient-to-r ${
+                    question.type === 'speed'
+                      ? "from-blue-600 to-blue-500"
+                      : question.type === 'quality'
+                      ? option.value >= 4
+                        ? "from-green-500 to-green-400"
+                        : "from-red-500 to-red-400"
+                      : option.value >= 4
+                      ? "from-green-500 to-green-400"
+                      : "from-yellow-500 to-yellow-400"
+                  } ${option.value <= 2 ? "text-white" : "text-black"}`
+                : "border-green-400/50 text-green-400/80 hover:bg-green-400/10"
+              }
+            `}
+          >
+            {option.label}
+          </Button>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -96,49 +127,24 @@ const SurveyForm = ({ onSubmit, onGenerate }: SurveyFormProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="grid gap-8">
-          {Object.entries(QUESTIONS).map(([key, { title, description }]) => (
-          <div key={key} className="space-y-3 p-4 rounded-lg bg-gray-800/50">
-            <div className="space-y-1">
-              <label className="text-sm font-mono text-green-400">
-                {`> ${title}`}
-              </label>
-              <span className="text-xs font-mono text-green-400/60 pl-4">
-                {description}
-              </span>
-            </div>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                  {[1, 2, 3, 4, 5, 9].map((rating) => (
-                    <Button
-                      key={rating}
-                      type="button"
-                      variant={ratings[key] === rating ? "default" : "outline"}
-                      onClick={() => handleRatingClick(key, rating)}
-                      className={`
-                        h-auto py-2 px-3 font-mono text-xs sm:text-sm transition-all duration-200
-                        ${ratings[key] === rating
-                          ? rating === 9
-                            ? "bg-gray-500 text-white hover:bg-gray-600"
-                            : `bg-gradient-to-r ${
-                              rating === 1
-                                ? "from-red-500 to-red-400"
-                                : rating === 2
-                                ? "from-orange-500 to-orange-400"
-                                : rating === 3
-                                ? "from-yellow-500 to-yellow-400"
-                                : rating === 4
-                                ? "from-blue-400 to-blue-300"
-                                : "from-blue-600 to-blue-500"
-                            } ${rating <= 2 ? "text-white" : "text-black"}`
-                          : "border-green-400/50 text-green-400/80 hover:bg-green-400/10"
-                        }
-                      `}
-                    >
-                      {rating === 9 ? "N/A" : rating}
-                    </Button>
-                  ))}
+          {Object.entries(QUESTIONS).map(([key, question]) => (
+            <div key={key} className="space-y-3 p-4 rounded-lg bg-gray-800/50">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono uppercase text-green-400/60">
+                    {question.type}
+                  </span>
+                  <label className="text-sm font-mono text-green-400">
+                    {`> ${question.title}`}
+                  </label>
                 </div>
+                <span className="text-xs font-mono text-green-400/60 pl-4">
+                  {question.description}
+                </span>
               </div>
-            ))}
+              {renderQuestionOptions(key, question)}
+            </div>
+          ))}
           </div>
         </form>
       </CardContent>
