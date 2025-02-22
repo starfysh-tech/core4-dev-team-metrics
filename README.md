@@ -126,4 +126,4 @@ If you encounter any issues, please report them in the project's issue tracker w
 
 ## 📝 License
 
-[LICENSE.md](./LICENSE.md)
+[LICENSE](./LICENSE)
