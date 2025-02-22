@@ -26,12 +26,7 @@ Visit [https://core4.starfysh.net](https://core4.starfysh.net)
 
 ## 🎮 Demo Data
 
-The application comes pre-loaded with demo data to help you explore its features. You can:
-
-- View example team assessments
-- Explore historical trends
-- See sample recommendations
-- Understand how the Core4 dimensions are measured in practice
+The application comes pre-loaded with demo data to help you explore its features. 
 
 No login is required - just use the team name `demo` to see the demo data.
 
@@ -96,12 +91,6 @@ We recommend using [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) 
     npm run dev
     ```
 
-### Additional Commands
-
-- `npm run lint` - Run ESLint
-- `npm run build` - Create production build
-- `npm run preview` - Preview production build locally
-
 ## 🏗️ Architecture
 
 The application follows a modern React architecture with:
@@ -137,4 +126,4 @@ If you encounter any issues, please report them in the project's issue tracker w
 
 ## 📝 License
 
-[Add appropriate license]
+[LICENSE.md](./LICENSE.md)
