@@ -167,7 +167,11 @@ export function generateRandomResponses(count: number): Response[] {
     ratings: Object.entries(QUESTIONS).reduce(
       (acc, [key, question]) => {
         if (question.type === 'effectiveness') {
-          acc[key] = Math.random() < 0.1 ? 9 : Math.floor(Math.random() * 5) + 1;
+          // Generate values for all subquestions
+          const effectivenessQuestion = question as EffectivenessQuestion;
+          Object.keys(effectivenessQuestion.subQuestions).forEach(subKey => {
+            acc[subKey] = Math.random() < 0.1 ? 9 : Math.floor(Math.random() * 5) + 1;
+          });
         } else {
           const options = question.options.filter(opt => opt.value !== -1);
           const randomOption = options[Math.floor(Math.random() * options.length)];

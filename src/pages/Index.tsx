@@ -4,7 +4,7 @@ import SurveyForm from "@/components/SurveyForm";
 import ResponseTable from "@/components/ResponseTable";
 import TeamPrompt from "@/components/TeamPrompt";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Share2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Share2, Github } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { generateRandomResponses } from "@/lib/utils";
 import { toast } from "sonner";
@@ -148,9 +148,16 @@ const Index = () => {
       if (fetchError) throw fetchError;
   
       if (insertedResponse) {
+        // Set cookie to indicate submission
         Cookies.set(`survey_${surveyId}_submitted`, 'true', { expires: 365 });
+        
+        // Update responses and show results
         setResponses((prev) => [...prev, insertedResponse]);
         setShowForm(false);
+        
+        // Scroll to top to show results
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
         toast.success("Response submitted successfully");
       }
     } catch (error) {
@@ -252,83 +259,95 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <header className="text-center" ref={topRef}>
-          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-green-400 font-mono mb-2">
-            {`> TEAM "${teamName}" CORE 4 FRAMEWORK_`}
-          </h1>
-          <p className="text-green-600 font-mono">
-            {"// System ready for input"}
-          </p>
-        </header>
+    <>
+      <div className="min-h-screen px-4 py-8">
+        <div className="mx-auto max-w-7xl space-y-8">
+          <header className="text-center" ref={topRef}>
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-green-400 font-mono mb-2">
+              {`> TEAM "${teamName}" CORE 4 FRAMEWORK_`}
+            </h1>
+            <p className="text-green-600 font-mono">
+              {"// System ready for input"}
+            </p>
+          </header>
 
-        <div className="space-y-8">
-        {showForm ? (
-          <SurveyForm 
-            onSubmit={handleSubmit} 
-            onGenerate={handleGenerateResponses} 
-          />
-        ) : (
-          <>
-            <TeamResults 
-              responses={responses} 
-              teamName={teamName || ""} 
+          <div className="space-y-8">
+          {showForm ? (
+            <SurveyForm 
+              onSubmit={handleSubmit} 
+              onGenerate={handleGenerateResponses}
+              teamName={teamName} 
             />
-            <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
-              <Button 
-                onClick={handleStartNewReport}
-                className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
-              >
-                Start a New Report
-              </Button>
-              <Button
-                onClick={handleShare}
-                variant="outline"
-                className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
-              >
-                <Share2 className="w-4 h-4" />
-                Share with Team Members
-              </Button>
-              <Button
-                onClick={handleHistoryToggle}
-                variant="outline"
-                className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
-              >
-                {showHistory ? (
-                  <>
-                    <ChevronUp className="w-4 h-4" />
-                    Hide Response History
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="w-4 h-4" />
-                    Show Response History
-                  </>
-                )}
-              </Button>
-              <Button
-                onClick={handleDownloadCSV}
-                variant="outline"
-                className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
-              >
-                DOWNLOAD_CSV &gt;
-              </Button>
-            </div>
-          </>
-        )}
+          ) : (
+            <>
+              <TeamResults 
+                responses={responses} 
+                teamName={teamName || ""} 
+              />
+              <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
+                <Button 
+                  onClick={handleStartNewReport}
+                  className="w-full font-mono bg-green-400 text-gray-900 hover:bg-green-500"
+                >
+                  Start a New Report
+                </Button>
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share with Team Members
+                </Button>
+                <Button
+                  onClick={handleHistoryToggle}
+                  variant="outline"
+                  className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
+                >
+                  {showHistory ? (
+                    <>
+                      <ChevronUp className="w-4 h-4" />
+                      Hide Response History
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4" />
+                      Show Response History
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleDownloadCSV}
+                  variant="outline"
+                  className="w-full font-mono flex items-center gap-2 border-green-400 text-green-400 hover:bg-green-400/10"
+                >
+                  DOWNLOAD_CSV &gt;
+                </Button>
+              </div>
+            </>
+          )}
 
-        {showHistory && !showForm && (
-          <div ref={historyRef} className="mt-8 bg-gray-900/80 backdrop-blur-sm rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-mono text-green-400">Response History</h3>
+          {showHistory && !showForm && (
+            <div ref={historyRef} className="mt-8 bg-gray-900/80 backdrop-blur-sm rounded-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-mono text-green-400">Response History</h3>
+              </div>
+              <ResponseTable responses={responses} />
             </div>
-            <ResponseTable responses={responses} />
+          )}
           </div>
-        )}
         </div>
       </div>
-    </div>
+      <a
+        href="https://github.com/starfysh-tech/core4-dev-team-metrics/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 left-4 text-gray-400 hover:text-green-400 transition-colors duration-200"
+        aria-label="View source on GitHub"
+      >
+        <Github className="w-8 h-8" />
+      </a>
+    </>
   );
 };
 
