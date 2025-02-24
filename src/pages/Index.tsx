@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import Cookies from 'js-cookie';
 import TeamResults from "@/components/TeamResults";
 import { QUESTIONS } from "@/lib/questions";
-
+import posthog from "@/lib/posthog";
 export interface Response {
   id: string;
   survey_id: string;
@@ -103,6 +103,12 @@ const Index = () => {
       const newSurveyId = crypto.randomUUID();
       setSurveyId(newSurveyId);
       setTeamName(name);
+
+      // Add PostHog tracking - only capture the team name
+      posthog.capture('team_created', {
+          team_name: name,
+          survey_id: newSurveyId
+      });
       
       // Update URL with the survey ID
       const params = new URLSearchParams(window.location.search);
