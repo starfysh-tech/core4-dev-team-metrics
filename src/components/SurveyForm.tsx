@@ -46,7 +46,7 @@ const SurveyForm = ({ onSubmit, onGenerate, teamName }: SurveyFormProps) => {
     return [...acc, key];
   }, [] as string[]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const missing = requiredQuestions.filter(q => !ratings[q]);
 
@@ -64,7 +64,7 @@ const SurveyForm = ({ onSubmit, onGenerate, teamName }: SurveyFormProps) => {
 
     try {
       // If we get here, all fields are filled
-      onSubmit(ratings);
+      await onSubmit(ratings);
       toast.success("Survey submitted successfully!");
       
       // Only clear form after successful submission
