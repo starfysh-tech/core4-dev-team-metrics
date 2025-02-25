@@ -22,22 +22,49 @@ export interface Response {
 }
 
 const validateRatings = (ratings: Record<string, number>): boolean => {
+  console.log("Validating ratings:", ratings);
+  
   // Check if all required questions are answered
-  const hasAllQuestions = Object.keys(QUESTIONS).every(key => key in ratings);
-  if (!hasAllQuestions) {
+  // Special handling for developerExperience which has subquestions
+  const requiredKeys = Object.keys(QUESTIONS).filter(key => key !== 'developerExperience');
+  const hasRequiredKeys = requiredKeys.every(key => key in ratings);
+  
+  // For developerExperience, check if any subquestion keys exist
+  const hasDeveloperExperienceKeys = Object.keys(ratings).some(key => 
+    key.startsWith('developerExperience_')
+  );
+  
+  if (!hasRequiredKeys || !hasDeveloperExperienceKeys) {
+    console.log("Missing questions. Required:", Object.keys(QUESTIONS), "Provided:", Object.keys(ratings));
     toast.error("Please answer all questions");
     return false;
   }
 
   // Check if all ratings are valid (1-5 or 9)
-  const hasValidRatings = Object.values(ratings).every(
-    rating => rating === 9 || (rating >= 1 && rating <= 5)
+  const hasValidRatings = Object.entries(ratings).every(
+    ([key, rating]) => {
+      // Special case for prThroughput which can be 0.5-9.0
+      if (key === 'prThroughput') {
+        return rating >= 0.5 && rating <= 9.0;
+      }
+      // For all other questions, rating should be 1-5 or 9
+      return rating === 9 || (rating >= 1 && rating <= 5);
+    }
   );
   if (!hasValidRatings) {
+    console.log("Invalid rating values detected:", Object.entries(ratings)
+      .filter(([key, rating]) => {
+        if (key === 'prThroughput') {
+          return rating < 0.5 || rating > 9.0;
+        }
+        return rating !== 9 && (rating < 1 || rating > 5);
+      })
+    );
     toast.error("Invalid rating values detected");
     return false;
   }
 
+  console.log("Ratings validation passed");
   return true;
 };
 
@@ -121,14 +148,26 @@ const Index = () => {
   };
 
   const handleSubmit = async (ratings: Record<string, number>) => {
-    if (!teamName || !surveyId) return;
+    console.log("handleSubmit called with ratings:", ratings);
+    console.log("Current state - teamName:", teamName, "surveyId:", surveyId);
+    
+    if (!teamName || !surveyId) {
+      console.error("Missing teamName or surveyId");
+      return;
+    }
   
     // Validate ratings
-    if (!validateRatings(ratings)) return;
+    console.log("About to validate ratings");
+    if (!validateRatings(ratings)) {
+      console.log("Validation failed, returning early");
+      return;
+    }
+    console.log("Validation passed, proceeding with submission");
   
     try {
       // Get the next response number
       const nextResponseNumber = responses.length + 1;
+      console.log("Next response number:", nextResponseNumber);
   
       const newResponse = {
         survey_id: surveyId,
@@ -136,14 +175,21 @@ const Index = () => {
         response_number: nextResponseNumber,
         ratings,
       };
+      console.log("Prepared new response:", newResponse);
   
+      console.log("Inserting response to Supabase");
       const { error } = await supabase
         .from("responses")
         .insert(newResponse);
   
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase insert error:", error);
+        throw error;
+      }
+      console.log("Insert successful");
   
       // Fetch the inserted response to get the generated ID and timestamp
+      console.log("Fetching inserted response");
       const { data: insertedResponse, error: fetchError } = await supabase
         .from("responses")
         .select("*")
@@ -151,20 +197,38 @@ const Index = () => {
         .eq("response_number", nextResponseNumber)
         .single();
   
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error("Supabase fetch error:", fetchError);
+        throw fetchError;
+      }
+      console.log("Fetch successful, response:", insertedResponse);
   
       if (insertedResponse) {
         // Set cookie to indicate submission
+        console.log("Setting cookie");
         Cookies.set(`survey_${surveyId}_submitted`, 'true', { expires: 365 });
+        console.log("Cookie set, checking if it exists:", Cookies.get(`survey_${surveyId}_submitted`));
         
         // Update responses and show results
-        setResponses((prev) => [...prev, insertedResponse]);
+        console.log("Updating responses state");
+        setResponses((prev) => {
+          console.log("Previous responses:", prev);
+          const newResponses = [...prev, insertedResponse];
+          console.log("New responses:", newResponses);
+          return newResponses;
+        });
+        
+        console.log("Setting showForm to false");
         setShowForm(false);
         
         // Scroll to top to show results
+        console.log("Scrolling to top");
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
+        console.log("Showing success toast");
         toast.success("Response submitted successfully");
+      } else {
+        console.error("insertedResponse is null or undefined");
       }
     } catch (error) {
       console.error("Error submitting response:", error);
