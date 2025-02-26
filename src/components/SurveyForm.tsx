@@ -41,7 +41,7 @@ const SurveyForm = ({ onSubmit, onGenerate, teamName }: SurveyFormProps) => {
   const requiredQuestions = Object.keys(QUESTIONS).reduce((acc, key) => {
     const question = QUESTIONS[key];
     if (question.type === 'effectiveness') {
-      return [...acc, ...Object.keys((question as EffectivenessQuestion).subQuestions).map(sq => `${key}_${sq}`)];
+      return [...acc, ...Object.keys((question as EffectivenessQuestion).subQuestions)];
     }
     return [...acc, key];
   }, [] as string[]);
@@ -112,8 +112,7 @@ const SurveyForm = ({ onSubmit, onGenerate, teamName }: SurveyFormProps) => {
         <div className="space-y-6">
           <div className="space-y-4 pl-4 border-l-2 border-green-400/20">
             {Object.entries(effectivenessQ.subQuestions).map(([subKey, subQ]) => {
-              const subQuestionKey = `${key}_${subKey}`;
-              const isSubMissing = missingFields.includes(subQuestionKey);
+              const isSubMissing = missingFields.includes(subKey);
               return (
                 <div 
                   key={subKey} 
@@ -121,7 +120,7 @@ const SurveyForm = ({ onSubmit, onGenerate, teamName }: SurveyFormProps) => {
                     "space-y-2 p-2 rounded",
                     isSubMissing ? "bg-red-900/20 border border-red-500/50" : ""
                   )}
-                  data-question-id={subQuestionKey}
+                  data-question-id={subKey}
                 >
                   <div className="space-y-1">
                     <label className="text-sm font-mono text-green-400">
@@ -136,11 +135,11 @@ const SurveyForm = ({ onSubmit, onGenerate, teamName }: SurveyFormProps) => {
                       <Button
                         key={rating}
                         type="button"
-                        variant={ratings[subQuestionKey] === rating ? "default" : "outline"}
-                        onClick={() => handleRatingClick(subQuestionKey, rating)}
+                        variant={ratings[subKey] === rating ? "default" : "outline"}
+                        onClick={() => handleRatingClick(subKey, rating)}
                         className={`
                           h-auto py-2 px-3 font-mono text-xs sm:text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2
-                          ${ratings[subQuestionKey] === rating
+                          ${ratings[subKey] === rating
                             ? rating === 9
                               ? "bg-gray-500 text-white hover:bg-gray-600"
                               : `bg-gradient-to-r ${

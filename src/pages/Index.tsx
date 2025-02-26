@@ -10,7 +10,7 @@ import { generateRandomResponses } from "@/lib/utils";
 import { toast } from "sonner";
 import Cookies from 'js-cookie';
 import TeamResults from "@/components/TeamResults";
-import { QUESTIONS } from "@/lib/questions";
+import { QUESTIONS, type EffectivenessQuestion } from "@/lib/questions";
 import posthog from "@/lib/posthog";
 export interface Response {
   id: string;
@@ -30,11 +30,11 @@ const validateRatings = (ratings: Record<string, number>): boolean => {
   const hasRequiredKeys = requiredKeys.every(key => key in ratings);
   
   // For developerExperience, check if any subquestion keys exist
-  const hasDeveloperExperienceKeys = Object.keys(ratings).some(key => 
-    key.startsWith('developerExperience_')
-  );
+  const dxiQuestion = QUESTIONS.developerExperience as EffectivenessQuestion;
+  const effectivenessSubKeys = Object.keys(dxiQuestion.subQuestions);
+  const hasEffectivenessKeys = effectivenessSubKeys.some(key => key in ratings);
   
-  if (!hasRequiredKeys || !hasDeveloperExperienceKeys) {
+  if (!hasRequiredKeys || !hasEffectivenessKeys) {
     console.log("Missing questions. Required:", Object.keys(QUESTIONS), "Provided:", Object.keys(ratings));
     toast.error("Please answer all questions");
     return false;
