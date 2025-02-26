@@ -58,7 +58,7 @@ const TeamResults = ({ responses, teamName }: TeamResultsProps) => {
         </a>
       </p>
       </div>
-      <div className="mt-6 pt-6 border-t border-green-400/20">
+      <div className="grid gap-4 max-w-4xl mx-auto mt-6 pt-6 border-t border-green-400/20">
         <Button
           onClick={handleExport}
           variant="outline"

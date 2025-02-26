@@ -350,6 +350,16 @@ const Index = () => {
             />
           ) : (
             <>
+              <div className="grid gap-4 max-w-4xl mx-auto mt-6 pt-6 border-t border-green-400/20">
+              <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="w-full font-mono flex items-center gap-2 border-blue-400 text-blue-400 hover:bg-blue-400/10"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share with Team Members
+                </Button>
+              </div>
               <TeamResults 
                 responses={responses} 
                 teamName={teamName || ""} 
